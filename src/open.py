@@ -3,6 +3,7 @@ import configparser
 import webbrowser
 import os
 import subprocess
+import argparse
 
 # Check if String contains and executable extension from list
 def isExecutable(item, executableList):
@@ -19,8 +20,29 @@ def getExecutableList(config):
 		executableList.append(config["executables"][executable])
 	return executableList
 
+def launchItems(config, configGroup):
+	foundItem = False
+	# Launch user specified group 
+	for group in config:
+		if group == configGroup:
+			foundItem = True
+			for item in config[group]:
+				if isExecutable(config[group][item], executableList): 
+					print("launching: " + item)
+					subprocess.Popen(config[group][item].split(" "))
+				else:
+					webbrowser.open_new(config[group][item])
+
+	# Let user know the passed invalid arg
+	if not foundItem:
+		print("Item not found")
+
 # User passed group of sites to open
-configGroup = sys.argv[1]
+parser = argparse.ArgumentParser(prog="opener", description='Open files, Programs, and webpages in batches')
+parser.add_argument('GROUP', help='group name that exists in open.ini\n Each item underneath a group is launched automatically')
+parser.add_argument('--version', action='version', version='%(prog)s 1.0')
+args = parser.parse_args()
+configGroup = args.GROUP
 
 # Read list of extensions marked as executable on system
 config = configparser.ConfigParser()
@@ -29,20 +51,6 @@ executableList = getExecutableList(config)
 
 # read items to launch to match passed arguments
 config.read('open.ini')
-foundItem = False
+launchItems(config, args.GROUP)
 
-# Launch user specified group 
-for group in config:
-	if group == configGroup:
-		foundItem = True
-		for item in config[group]:
-			if isExecutable(config[group][item], executableList): 
-				print("launching: " + item)
-				subprocess.Popen(config[group][item].split(" "))
-			else:
-				webbrowser.open_new(config[group][item])
-
-# Let user know the passed invalid arg
-if not foundItem:
-	print("Item not found")
 
