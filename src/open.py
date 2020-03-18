@@ -45,12 +45,13 @@ args = parser.parse_args()
 configGroup = args.GROUP
 
 # Read list of extensions marked as executable on system
+scriptDir = sys.path[0] + os.path.sep
 config = configparser.ConfigParser()
-config.read('executable.ini')
+config.read(scriptDir + 'executable.ini')
 executableList = getExecutableList(config)
 
 # read items to launch to match passed arguments
-config.read('open.ini')
+config.read(scriptDir + 'open.ini')
 launchItems(config, args.GROUP)
 
 
